@@ -24,5 +24,9 @@ Vagrant.configure("2") do |config|
   # Restart Nginx
   sudo systemctl restart nginx
 
+  # Install FTPS
+  sudo apt-get update
+  sudo apt-get install vsftpd
+
 SHELL
 end
