@@ -1,64 +1,77 @@
+
 # Nginx Web Server and FTPS Configuration on Debian with Vagrant
 
-## Overview
+## 📖 Overview
 
-This repository provides instructions and configurations for setting up an Nginx web server on a Debian virtual machine managed with Vagrant. It includes steps to configure a second domain, transfer files securely using FTPS, and perform essential server management tasks like log verification and permission adjustments.
+This repository provides a comprehensive guide for setting up a Debian-based Nginx web server and FTPS service within a Vagrant-managed virtual machine. The project includes:
 
-## Requirements
+- Setting up two websites (`my_site` and `new_site`) with Nginx.
+- Secure file transfer using FTPS.
+- Proper directory structure and permission configuration.
+- Debugging logs and troubleshooting common issues.
+
+## 📋 Requirements
+
+Ensure the following tools are installed on your local machine:
 
 - [Vagrant](https://www.vagrantup.com/)
 - [VirtualBox](https://www.virtualbox.org/) (or another Vagrant-compatible provider)
-- [Git](https://git-scm.com/) for repository management
+- [Git](https://git-scm.com/) for cloning repositories
 
-## Setup Instructions
+## ⚙️ Setup Instructions
 
-### 1. Clone the Repository
+### 1️⃣ Clone the Repository
 
-Clone this repository to your local machine:
+Start by cloning this repository to your local machine:
 
 ```bash
-git clone <URL-of-this-repository>
+git clone <repository-url>
 cd <repository-name>
 ```
 
-### 2. Configure the Vagrantfile
+### 2️⃣ Configure the Vagrantfile
 
-The Vagrantfile in this repository is pre-configured to install and start Nginx automatically on a Debian virtual machine.
+The included `Vagrantfile` is pre-configured to:
 
-To adjust the network settings or other parameters:
+- Install and start Nginx.
+- Create necessary directories for the websites.
+- Set up FTPS.
 
-Open Vagrantfile.
-Set the desired IP address or network configuration.
-Example configuration with a fixed IP:
+You can adjust network settings if needed. For instance, to configure a private network with a fixed IP, ensure the following is present in the `Vagrantfile`:
 
-`config.vm.network "private_network", ip: "192.168.56.10"`
+```ruby
+config.vm.network "private_network", ip: "192.168.56.10"
+```
 
-Add provision to update packages and install nginx.
+### 3️⃣ Configure the `my_site` Web Directory
 
-### 3. Create and Configure Your Web Directory
+1. **Create the web directory:**
+   ```bash
+   sudo mkdir -p /var/www/my_site/html
+   ```
 
-A directory for the website content was created:
+2. **Clone an example website:**
+   ```bash
+   git clone https://github.com/cloudacademy/static-website-example /var/www/my_site/html
+   ```
 
-`sudo mkdir -p /var/www/my_site/html`
-A example website repository was cloned in this directory:
+3. **Set permissions:**
+   ```bash
+   sudo chown -R www-data:www-data /var/www/my_site/html
+   sudo chmod -R 755 /var/www/my_site
+   ```
 
-`git clone https://github.com/cloudacademy/static-website-example /var/www/my_site/html`
-Appropriate permissions was set:
+### 4️⃣ Set Up Nginx for `my_site`
 
-`sudo chown -R www-data:www-data /var/www/my_site/html`
-`sudo chmod -R 755 /var/www/my_site`
-
-To test that server is working correctly, in this case client should be accesed by:
-http://192.158.56.10
-
-### 4. Configure the Nginx Server Block
-
-A new server block for the website is created:
-
-`sudo nano /etc/nginx/sites-available/my_site`
-With the following configuration:
+Create a server block configuration for `my_site`:
 
 ```bash
+sudo nano /etc/nginx/sites-available/my_site
+```
+
+Add the following content:
+
+```nginx
 server {
     listen 80;
     server_name my_site;
@@ -71,37 +84,97 @@ server {
 }
 ```
 
-With a symbolic link to enable the site:
+Enable the site and restart Nginx:
 
-````bash
-sudo ln -s /etc/nginx/sites-available/my_site/etc/nginx/sites-enabled/
-sudo systemctl restart nginx```
-````
-
-### 5. Comprobations
-
-Add to C:\Windows\System32\drivers\etc\hosts (in this case I am working with Windows):
-`192.168.56.10 my_site`
-
-Checking the logs in /var/log/nginx/access.log
-![alt text](image.png)
-and /var/log/nginx/error.log
-![alt text](image-1.png)
-
-### 4. Install and config FTP
-
-Provision added to install FTP in Vagrantfile
-
-```shell
-sudo apt-get update
-sudo apt-get install vsftpd
+```bash
+sudo ln -s /etc/nginx/sites-available/my_site /etc/nginx/sites-enabled/
+sudo systemctl restart nginx
 ```
 
-Create a directory for vsftpd to connect when the user enters in /home/vagrant/ftp.
+### 5️⃣ Test Access to `my_site`
 
-Security certificates:
+1. Add the domain mapping to your host's file (on Windows):
+   ```plaintext
+   192.168.56.10 my_site
+   ```
 
-```shell
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout
- /etc/ssl/private/vsftpd.key -out /etc/ssl/certs/vsftpd.crt
-```
+2. Open a browser and visit: `http://my_site`.
+
+3. Check logs for issues:
+   - Access log: `/var/log/nginx/access.log`
+   - Error log: `/var/log/nginx/error.log`
+
+---
+
+## 🌐 Setting Up `new_site`
+
+1. **Create the web directory:**
+   ```bash
+   sudo mkdir -p /var/www/new_site/html
+   ```
+
+2. **Set permissions:**
+   ```bash
+   sudo chown -R vagrant:www-data /var/www/new_site/html
+   sudo chmod -R 755 /var/www/new_site
+   ```
+
+3. **Set up Nginx configuration for `new_site`:**
+   ```bash
+   sudo nano /etc/nginx/sites-available/new_site
+   ```
+
+   Add the following content:
+
+   ```nginx
+   server {
+       listen 80;
+       listen [::]:80;
+       root /home/vagrant/ftp;
+       index index.html index.htm;
+       server_name new_site;
+
+       location / {
+           try_files $uri $uri/ =404;
+       }
+   }
+   ```
+
+4. **Enable the site and restart Nginx:**
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/new_site /etc/nginx/sites-enabled/
+   sudo systemctl restart nginx
+   ```
+
+5. **Test Access to `new_site`:**
+   Add the domain mapping to your host's file (on Windows):
+   ```plaintext
+   192.168.56.10 new_site
+   ```
+   Open a browser and visit: `http://new_site`.
+
+## 🔒 Setting Up FTPS
+
+1. **Install vsftpd:**
+   ```bash
+   sudo apt-get update
+   sudo apt-get install vsftpd
+   ```
+
+2. **Create an FTP directory:**
+   ```bash
+   sudo mkdir -p /home/vagrant/ftp
+   sudo chmod -R 755 /home/vagrant/ftp
+   sudo chown -R vagrant:vagrant /home/vagrant/ftp
+   ```
+
+3. **Generate SSL Certificates:**
+   ```bash
+   sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+   -keyout /etc/ssl/private/vsftpd.key -out /etc/ssl/certs/vsftpd.crt
+   ```
+
+4. **Restart vsftpd:**
+   ```bash
+   sudo systemctl restart vsftpd
+   ```

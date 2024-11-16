@@ -1,0 +1,10 @@
+server {
+    listen 80;
+    listen [::]:80;
+    root /home/vagrant/ftp;
+    index index.html index.htm;
+    server_name new_site;
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
