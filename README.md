@@ -33,6 +33,8 @@ Example configuration with a fixed IP:
 
 `config.vm.network "private_network", ip: "192.168.56.10"`
 
+Add provision to update packages and install nginx.
+
 ### 3. Create and Configure Your Web Directory
 
 A directory for the website content was created:
@@ -75,3 +77,31 @@ With a symbolic link to enable the site:
 sudo ln -s /etc/nginx/sites-available/my_site/etc/nginx/sites-enabled/
 sudo systemctl restart nginx```
 ````
+
+### 5. Comprobations
+
+Add to C:\Windows\System32\drivers\etc\hosts (in this case I am working with Windows):
+`192.168.56.10 my_site`
+
+Checking the logs in /var/log/nginx/access.log
+![alt text](image.png)
+and /var/log/nginx/error.log
+![alt text](image-1.png)
+
+### 4. Install and config FTP
+
+Provision added to install FTP in Vagrantfile
+
+```shell
+sudo apt-get update
+sudo apt-get install vsftpd
+```
+
+Create a directory for vsftpd to connect when the user enters in /home/vagrant/ftp.
+
+Security certificates:
+
+```shell
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout
+ /etc/ssl/private/vsftpd.key -out /etc/ssl/certs/vsftpd.crt
+```
