@@ -1,0 +1,11 @@
+ ¿Qué pasa si no hago el link simbólico entre sites-available y sites-enabled de mi sitio web?
+
+Nginx no reconocerá ni generará el servidor para el sitio web si la configuración no está vinculada adecuadamente. 
+Aunque el archivo de configuración permanecerá guardado en el directorio sites-available, 
+Nginx lo ignorará por completo si no está habilitado mediante un enlace simbólico en el directorio sites-enabled. 
+Esto significa que cualquier configuración que haya sido definida en sites-available no tendrá efecto.
+
+Al reiniciar o recargar Nginx, el servidor únicamente leerá las configuraciones presentes en el directorio sites-enabled. 
+Por tanto, si no se crea el enlace simbólico correspondiente, los cambios que se realicen en la configuración del sitio web
+no se aplicarán.
+

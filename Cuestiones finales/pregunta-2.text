@@ -1,0 +1,27 @@
+¿Qué pasa si no le doy los permisos adecuados a /var/www/nombre_web?
+
+Si no se asignan los permisos adecuados al directorio /var/www/nombre_web, 
+pueden surgir varios problemas que afectan tanto el funcionamiento como la seguridad del sitio web. 
+A continuación, se detallan algunas posibles consecuencias:
+
+Errores de acceso (403 Forbidden):
+Cuando el servidor Nginx no tiene los permisos necesarios para leer los archivos del directorio, 
+se generan errores 403 Forbidden al intentar acceder al sitio. Esto ocurre porque el servidor no puede servir los 
+archivos al carecer de permisos de lectura sobre el directorio o sus contenidos. Es fundamental que el usuario que ejecuta Nginx 
+(como www-data en configuraciones comunes) tenga los permisos adecuados para evitar estos errores.
+
+Riesgos de seguridad por permisos demasiado permisivos:
+Configurar permisos excesivamente permisivos, como 777 (lectura, escritura y ejecución para todos), 
+incrementa significativamente el riesgo de comprometer la seguridad del sitio. Con permisos tan abiertos, 
+cualquier usuario del sistema, o incluso procesos malintencionados, podría modificar o eliminar archivos críticos del sitio web. 
+Esto podría resultar en inyecciones de código malicioso, pérdida de datos o control no autorizado del sitio. 
+Mantener permisos restrictivos pero funcionales es esencial para evitar vulnerabilidades.
+
+Problemas relacionados con la propiedad y el grupo del directorio:
+Una configuración inadecuada de la propiedad o del grupo asignado al directorio puede ocasionar inconvenientes en 
+la ejecución de scripts o en operaciones específicas del sitio, como la carga de archivos o la generación de cachés. 
+Por ejemplo, si un script PHP requiere acceso de escritura en un subdirectorio y este no cuenta con los permisos 
+ni la asignación de propietario o grupo adecuados, se generarán errores que impedirán estas funciones.
+
+Por estas razones, es importante establecer una configuración de permisos y propiedad equilibrada, 
+que permita el acceso necesario al servidor mientras se protege el sitio de posibles amenazas.
