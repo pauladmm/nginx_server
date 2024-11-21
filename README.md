@@ -1,4 +1,3 @@
-
 # Nginx Web Server and FTPS Configuration on Debian with Vagrant
 
 ## 📖 Overview
@@ -46,11 +45,13 @@ config.vm.network "private_network", ip: "192.168.56.10"
 ### 3️⃣ Configure the `my_site` Web Directory
 
 1. **Create the web directory:**
+
    ```bash
    sudo mkdir -p /var/www/my_site/html
    ```
 
 2. **Clone an example website:**
+
    ```bash
    git clone https://github.com/cloudacademy/static-website-example /var/www/my_site/html
    ```
@@ -94,6 +95,7 @@ sudo systemctl restart nginx
 ### 5️⃣ Test Access to `my_site`
 
 1. Add the domain mapping to your host's file (on Windows):
+
    ```plaintext
    192.168.56.10 my_site
    ```
@@ -109,17 +111,20 @@ sudo systemctl restart nginx
 ## 🌐 Setting Up `new_site`
 
 1. **Create the web directory:**
+
    ```bash
    sudo mkdir -p /var/www/new_site/html
    ```
 
 2. **Set permissions:**
+
    ```bash
    sudo chown -R vagrant:www-data /var/www/new_site/html
    sudo chmod -R 755 /var/www/new_site
    ```
 
 3. **Set up Nginx configuration for `new_site`:**
+
    ```bash
    sudo nano /etc/nginx/sites-available/new_site
    ```
@@ -141,6 +146,7 @@ sudo systemctl restart nginx
    ```
 
 4. **Enable the site and restart Nginx:**
+
    ```bash
    sudo ln -s /etc/nginx/sites-available/new_site /etc/nginx/sites-enabled/
    sudo systemctl restart nginx
@@ -156,12 +162,14 @@ sudo systemctl restart nginx
 ## 🔒 Setting Up FTPS
 
 1. **Install vsftpd:**
+
    ```bash
    sudo apt-get update
    sudo apt-get install vsftpd
    ```
 
 2. **Create an FTP directory:**
+
    ```bash
    sudo mkdir -p /home/vagrant/ftp
    sudo chmod -R 755 /home/vagrant/ftp
@@ -169,6 +177,7 @@ sudo systemctl restart nginx
    ```
 
 3. **Generate SSL Certificates:**
+
    ```bash
    sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
    -keyout /etc/ssl/private/vsftpd.key -out /etc/ssl/certs/vsftpd.crt
@@ -178,3 +187,49 @@ sudo systemctl restart nginx
    ```bash
    sudo systemctl restart vsftpd
    ```
+
+### 6 Autentication
+
+6.1 Install openssl
+
+`dpkg -l | grep openssl`
+
+6.2 Creation user and password
+Create a hidden file .htpasswd inside /etc/nginx to store users and passwords
+`sudo htpasswd -c /etc/nginx/.htpasswd`
+
+Create an user:
+`sudo sh -c "echo -n 'Paula:' >> /etc/nginx/.htpasswd"`
+
+Create a password to this user:
+`sudo sh -c "openssl passwd -apr1 'tupassword'>> /etc/nginx/.htpasswd"`
+
+Two users were created and proved that exist in:
+``
+
+[imagen de cat]
+paula paulapsswd
+del_moral delmoralpssdw
+
+6.3 Modify authentication
+` server {
+ listen 80;
+ listen 
+[::]:80;
+ root 
+/var/www/deaw/html/simple-static-website;
+ index 
+index.html 
+index.htm 
+index.nginx-debian.html;
+ server_name 
+nombre_web;
+ location / {
+ auth_basic 
+}
+ }
+ "Área 
+restringida";
+ auth_basic_user_file 
+/etc/nginx/.htpasswd;
+ try_files $uri $uri/ =404`

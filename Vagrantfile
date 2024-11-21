@@ -21,6 +21,8 @@ Vagrant.configure("2") do |config|
   # Configure website directory for my_site(from repo) and new_site(personal web)
   sudo mkdir -p /var/www/my_site/html
   sudo mkdir -p /var/www/new_site/html
+   # Copy my site perfect_education_website into var/www/ and give permission
+  sudo mkdir -p /var/www/perfect_education_website/html 
 
   #permision
   sudo chown -R www-data:www-data /var/www/my_site/html
@@ -29,20 +31,41 @@ Vagrant.configure("2") do |config|
   sudo chown -R vagrant:www-data /var/www/new_site/html
   sudo chmod -R 755 /var/www/new_site
 
+  sudo chown -R www-data:www-data /var/www/perfect_education_website/html
+  sudo chmod -R 755 /var/www/perfect_education_website
+   
+
   # install git to clone the repo
   sudo apt update
   sudo apt install git
 
   # my_site repo
   sudo git clone https://github.com/cloudacademy/static-website-example /var/www/my_site/html
+  sudo cp -rv /vagrant/html/* /var/www/perfect_education_website/html
   
 
   # Config Nginx 
   sudo cp -v /vagrant/my_site/my_site /etc/nginx/sites-available/my_site
   sudo cp -v /vagrant/new_site/new_site /etc/nginx/sites-available/
+  sudo cp -v /vagrant/perfect_education_website /etc/nginx/sites-available/perfect_education_website
+
   sudo ln -s /etc/nginx/sites-available/my_site /etc/nginx/sites-enabled/
   sudo ln -s /etc/nginx/sites-available/new_site /etc/nginx/sites-enabled/
-   
+
+
+  sudo ln -fs /etc/nginx/sites-available/perfect_education_website /etc/nginx/sites-enabled
+
+
+
+
+
+
+
+
+# Config auth new web 
+
+
+
   # Restart Nginx
   sudo systemctl restart nginx
 
@@ -66,9 +89,21 @@ Vagrant.configure("2") do |config|
   
   # Restart FTP
   sudo systemctl restart vsftpd
- 
-
   
+
  
+  # In order to test authentication with Nginx
+  # Install openssl package and users and pass creation in /etc/nginx/.htpsswd
+  sudo apt install apache2-utils
+  sudo dpkg -l | grep openssl
+
+  sudo htpasswd -c /etc/nginx/.htpasswd
+  sudo sh -c "echo -n 'Paula:' >> /etc/nginx/.htpasswd"
+  sudo sh -c "echo -n 'del_Moral:' >> /etc/nginx/.htpasswd"
+  sudo sh -c "openssl passwd -apr1 'paulapsswd'>> /etc/nginx/.htpasswd"
+  sudo sh -c "openssl passwd -apr1 'delMoralpsswd'>> /etc/nginx/.htpasswd"
+
+  sudo systemctl restart nginx
+
 SHELL
 end
