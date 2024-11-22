@@ -55,8 +55,8 @@ Vagrant.configure("2") do |config|
   cp /vagrant/dew_config_files/db.perfect-education.com /etc/bind/db.perfect-education.com
   cp /vagrant/dew_config_files/named.conf.local /etc/bind/named.conf.local
 
-  # config server_block foro perfect-education.com
-  cp /vagrant/dew_config_files /etc/nginx/sites-available/perfect-education.com 
+  # config server_block for perfect-education.com
+  cp /vagrant/dew_config_files/perfect-education.com /etc/nginx/sites-available/perfect-education.com 
 
   systemctl restart bind9
   systemctl reload nginx
@@ -66,6 +66,7 @@ Vagrant.configure("2") do |config|
 
 
     ln -fs /etc/nginx/sites-available/perfect_education_website /etc/nginx/sites-enabled
+    ln -fs /etc/nginx/sites-available/perfect-education.com /etc/nginx/sites-enabled
 
   # Restart Nginx
     systemctl restart nginx
@@ -113,6 +114,8 @@ Vagrant.configure("2") do |config|
    -newkey rsa:2048 \
    -keyout /etc/ssl/private/perfect-education.com.key \
    -out /etc/ssl/certs/perfect-education.com.crt
+
+   systemctl reload nginx
 
 SHELL
 end
