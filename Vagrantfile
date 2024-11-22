@@ -104,9 +104,15 @@ Vagrant.configure("2") do |config|
     systemctl restart nginx
 
   # Firewall enabled
-   ufw allow ssh ①
+   ufw allow ssh 
    ufw allow 'Nginx Full'
    ufw delete allow 'Nginx HTTP' 
+
+   # Certification generation
+   openssl req -x509 -nodes -days 365 \
+   -newkey rsa:2048 \
+   -keyout /etc/ssl/private/perfect-education.com.key \
+   -out /etc/ssl/certs/perfect-education.com.crt
 
 SHELL
 end
