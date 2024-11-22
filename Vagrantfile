@@ -18,13 +18,12 @@ Vagrant.configure("2") do |config|
   sudo apt install -y nginx
   sudo systemctl start nginx
 
-  # Configure website directory for my_site(from repo) and new_site(personal web)
+  # Configure website directory for my_site(from repo) & new_site(personal web) & perfect_education_website(auth)
   sudo mkdir -p /var/www/my_site/html
   sudo mkdir -p /var/www/new_site/html
-   # Copy my site perfect_education_website into var/www/ and give permission
   sudo mkdir -p /var/www/perfect_education_website/html 
 
-  #permision
+  # permisions
   sudo chown -R www-data:www-data /var/www/my_site/html
   sudo chmod -R 755 /var/www/my_site
 
@@ -35,11 +34,11 @@ Vagrant.configure("2") do |config|
   sudo chmod -R 755 /var/www/perfect_education_website
    
 
-  # install git to clone the repo
+  # install git 
   sudo apt update
   sudo apt install git
 
-  # my_site repo
+  # my_site repo & perfect_education_website
   sudo git clone https://github.com/cloudacademy/static-website-example /var/www/my_site/html
   sudo cp -rv /vagrant/html/* /var/www/perfect_education_website/html
   
@@ -47,6 +46,7 @@ Vagrant.configure("2") do |config|
   # Config Nginx 
   sudo cp -v /vagrant/my_site/my_site /etc/nginx/sites-available/my_site
   sudo cp -v /vagrant/new_site/new_site /etc/nginx/sites-available/
+  # This last version allow host to access with credentials and ip
   sudo cp -v /vagrant/perfect_education_website /etc/nginx/sites-available/perfect_education_website
 
   sudo ln -s /etc/nginx/sites-available/my_site /etc/nginx/sites-enabled/
@@ -54,17 +54,6 @@ Vagrant.configure("2") do |config|
 
 
   sudo ln -fs /etc/nginx/sites-available/perfect_education_website /etc/nginx/sites-enabled
-
-
-
-
-
-
-
-
-# Config auth new web 
-
-
 
   # Restart Nginx
   sudo systemctl restart nginx
@@ -88,8 +77,7 @@ Vagrant.configure("2") do |config|
   sudo cp /vagrant/my_site/vsftpd.conf /etc/vsftpd.conf
   
   # Restart FTP
-  sudo systemctl restart vsftpd
-  
+  sudo systemctl restart vsftpd  
 
  
   # In order to test authentication with Nginx
@@ -98,6 +86,8 @@ Vagrant.configure("2") do |config|
   sudo dpkg -l | grep openssl
 
   sudo htpasswd -c /etc/nginx/.htpasswd
+
+  # User and password creation
   sudo sh -c "echo -n 'Paula:' >> /etc/nginx/.htpasswd"
   sudo sh -c "echo -n 'del_Moral:' >> /etc/nginx/.htpasswd"
   sudo sh -c "openssl passwd -apr1 'paulapsswd'>> /etc/nginx/.htpasswd"

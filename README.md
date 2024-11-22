@@ -17,219 +17,161 @@ Ensure the following tools are installed on your local machine:
 - [VirtualBox](https://www.virtualbox.org/) (or another Vagrant-compatible provider)
 - [Git](https://git-scm.com/) for cloning repositories
 
-## ⚙️ Setup Instructions
+---
 
-### 1️⃣ Clone the Repository
+### 6️⃣ Authentication
 
-Start by cloning this repository to your local machine:
+#### 6.1 Install OpenSSL
 
-```bash
-git clone <repository-url>
-cd <repository-name>
-```
-
-### 2️⃣ Configure the Vagrantfile
-
-The included `Vagrantfile` is pre-configured to:
-
-- Install and start Nginx.
-- Create necessary directories for the websites.
-- Set up FTPS.
-
-You can adjust network settings if needed. For instance, to configure a private network with a fixed IP, ensure the following is present in the `Vagrantfile`:
-
-```ruby
-config.vm.network "private_network", ip: "192.168.56.10"
-```
-
-### 3️⃣ Configure the `my_site` Web Directory
-
-1. **Create the web directory:**
-
-   ```bash
-   sudo mkdir -p /var/www/my_site/html
-   ```
-
-2. **Clone an example website:**
-
-   ```bash
-   git clone https://github.com/cloudacademy/static-website-example /var/www/my_site/html
-   ```
-
-3. **Set permissions:**
-   ```bash
-   sudo chown -R www-data:www-data /var/www/my_site/html
-   sudo chmod -R 755 /var/www/my_site
-   ```
-
-### 4️⃣ Set Up Nginx for `my_site`
-
-Create a server block configuration for `my_site`:
+Verify that OpenSSL is installed on your system:
 
 ```bash
-sudo nano /etc/nginx/sites-available/my_site
+dpkg -l | grep openssl
 ```
 
-Add the following content:
+#### 6.2 Create Users and Passwords
+
+1. Create a hidden `.htpasswd` file inside `/etc/nginx` to store users and passwords:
+
+   ```bash
+   sudo htpasswd -c /etc/nginx/.htpasswd
+   ```
+
+2. Create a user named `Paula`:
+
+   ```bash
+   sudo sh -c "echo -n 'Paula:' >> /etc/nginx/.htpasswd"
+   ```
+
+3. Generate a password for the user:
+
+   ```bash
+   sudo sh -c "openssl passwd -apr1 'yourpassword' >> /etc/nginx/.htpasswd"
+   ```
+
+Two users were created successfully and verified as follows:
+
+![imagen de cat](./ciphrated_user_pass.PNG)
+
+#### 6.3 Modify the Server Block
+
+Update the server block to include basic authentication:
 
 ```nginx
 server {
     listen 80;
-    server_name my_site;
-    root /var/www/my_site/html;
-    index index.html index.htm;
+    listen [::]:80;
+    root /var/www/perfect_education_website/html;
+    index index.html index.htm index.nginx-debian.html;
+    server_name perfect_education_website;
 
     location / {
+        auth_basic "Área restringida";
+        auth_basic_user_file /etc/nginx/.htpasswd;
         try_files $uri $uri/ =404;
     }
 }
 ```
 
-Enable the site and restart Nginx:
+---
 
-```bash
-sudo ln -s /etc/nginx/sites-available/my_site /etc/nginx/sites-enabled/
-sudo systemctl restart nginx
-```
+### 7️⃣ Tasks
 
-### 5️⃣ Test Access to `my_site`
+#### T1: Test User Authentication
 
-1. Add the domain mapping to your host's file (on Windows):
+1. Attempt to log in with an incorrect user first, then with a valid user.
 
-   ```plaintext
-   192.168.56.10 my_site
+   - Successful access:
+     ![imagen de access_success](./success_access.PNG)
+   - Access denied:
+     ![imagen error_access](./error_access.PNG)
+
+2. Verify the logs for access and error details using the following commands:
+
+   ```bash
+   sudo tail -f /var/log/nginx/access.log
+   sudo tail -f /var/log/nginx/error.log
    ```
 
-2. Open a browser and visit: `http://my_site`.
+#### T2: Add Authentication for `contact.html`
 
-3. Check logs for issues:
-   - Access log: `/var/log/nginx/access.log`
-   - Error log: `/var/log/nginx/error.log`
+Modify the server block to require authentication for `contact.html`:
+
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    root /var/www/perfect_education_website/html;
+    index index.html index.htm index.nginx-debian.html;
+    server_name perfect_education_website;
+
+    location / {
+        auth_basic "Area Restringida";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        try_files $uri $uri/ =404;
+
+        location = /contact.html {
+            auth_basic "Restricted Area";
+            auth_basic_user_file /etc/nginx/.htpasswd;
+        }
+    }
+}
+```
 
 ---
 
-## 🌐 Setting Up `new_site`
+#### T3.1: Restrict Access by IP
 
-1. **Create the web directory:**
+Configure Nginx to deny access from the host machine's IP to the website's root:
 
-   ```bash
-   sudo mkdir -p /var/www/new_site/html
-   ```
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    root /var/www/perfect_education_website/html;
+    index index.html index.htm index.nginx-debian.html;
+    server_name perfect_education_website;
 
-2. **Set permissions:**
+    location / {
+        satisfy all;
+        deny 192.168.56.1;
+        auth_basic "Restricted Area";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        try_files $uri $uri/ =404;
 
-   ```bash
-   sudo chown -R vagrant:www-data /var/www/new_site/html
-   sudo chmod -R 755 /var/www/new_site
-   ```
-
-3. **Set up Nginx configuration for `new_site`:**
-
-   ```bash
-   sudo nano /etc/nginx/sites-available/new_site
-   ```
-
-   Add the following content:
-
-   ```nginx
-   server {
-       listen 80;
-       listen [::]:80;
-       root /home/vagrant/ftp;
-       index index.html index.htm;
-       server_name new_site;
-
-       location / {
-           try_files $uri $uri/ =404;
-       }
-   }
-   ```
-
-4. **Enable the site and restart Nginx:**
-
-   ```bash
-   sudo ln -s /etc/nginx/sites-available/new_site /etc/nginx/sites-enabled/
-   sudo systemctl restart nginx
-   ```
-
-5. **Test Access to `new_site`:**
-   Add the domain mapping to your host's file (on Windows):
-   ```plaintext
-   192.168.56.10 new_site
-   ```
-   Open a browser and visit: `http://new_site`.
-
-## 🔒 Setting Up FTPS
-
-1. **Install vsftpd:**
-
-   ```bash
-   sudo apt-get update
-   sudo apt-get install vsftpd
-   ```
-
-2. **Create an FTP directory:**
-
-   ```bash
-   sudo mkdir -p /home/vagrant/ftp
-   sudo chmod -R 755 /home/vagrant/ftp
-   sudo chown -R vagrant:vagrant /home/vagrant/ftp
-   ```
-
-3. **Generate SSL Certificates:**
-
-   ```bash
-   sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-   -keyout /etc/ssl/private/vsftpd.key -out /etc/ssl/certs/vsftpd.crt
-   ```
-
-4. **Restart vsftpd:**
-   ```bash
-   sudo systemctl restart vsftpd
-   ```
-
-### 6 Autentication
-
-6.1 Install openssl
-
-`dpkg -l | grep openssl`
-
-6.2 Creation user and password
-Create a hidden file .htpasswd inside /etc/nginx to store users and passwords
-`sudo htpasswd -c /etc/nginx/.htpasswd`
-
-Create an user:
-`sudo sh -c "echo -n 'Paula:' >> /etc/nginx/.htpasswd"`
-
-Create a password to this user:
-`sudo sh -c "openssl passwd -apr1 'tupassword'>> /etc/nginx/.htpasswd"`
-
-Two users were created and proved that exist in:
-``
-
-[imagen de cat]
-paula paulapsswd
-del_moral delmoralpssdw
-
-6.3 Modify authentication
-` server {
- listen 80;
- listen 
-[::]:80;
- root 
-/var/www/deaw/html/simple-static-website;
- index 
-index.html 
-index.htm 
-index.nginx-debian.html;
- server_name 
-nombre_web;
- location / {
- auth_basic 
+        location = /contact.html {
+            auth_basic "Restricted Area";
+            auth_basic_user_file /etc/nginx/.htpasswd;
+        }
+    }
 }
- }
- "Área 
-restringida";
- auth_basic_user_file 
-/etc/nginx/.htpasswd;
- try_files $uri $uri/ =404`
+```
+
+- Host access denied:
+  ![foto access_host_denied_nav](./access_host_denied_nav.PNG)
+  ![foto access_host_denied](./access_host_denied.PNG)
+
+#### T3.2: Combine IP and User Authentication
+
+Configure Nginx to require both a valid IP and user credentials:
+
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    root /var/www/perfect_education_website/html;
+    index index.html index.htm index.nginx-debian.html;
+    server_name perfect_education_website;
+
+    location / {
+        satisfy all;
+        allow 192.168.56.1;
+        auth_basic "Restricted Area";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        try_files $uri $uri/ =404;
+    }
+}
+```
+
+- Successful access:
+  ![foto access_host_satisfy_all](./access_host_satisfy_all.PNG)
