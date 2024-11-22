@@ -52,11 +52,11 @@ Vagrant.configure("2") do |config|
     cp -v /vagrant/perfect_education_website /etc/nginx/sites-available/perfect_education_website
 
   # copy config files from DNS server perfect-education.com
-  cp /vagrant/dew_config_files/db.perfect-education.com /etc/bind/db.perfect-education.com
-  cp /vagrant/dew_config_files/named.conf.local /etc/bind/named.conf.local
+  cp /vagrant/pew_files/db.perfect-education.com /etc/bind/db.perfect-education.com
+  cp /vagrant/pew_files/named.conf.local /etc/bind/named.conf.local
 
   # config server_block for perfect-education.com
-  cp /vagrant/dew_config_files/perfect-education.com /etc/nginx/sites-available/perfect-education.com 
+  cp /vagrant/pew_files/perfect-education.com /etc/nginx/sites-available/perfect-education.com 
 
   systemctl restart bind9
   systemctl reload nginx
