@@ -55,7 +55,7 @@ Two users were created successfully and verified as follows:
 
 #### 6.3 Modify the Server Block
 
-Update the server block to include basic authentication:
+Update the server block to include basic authentication (pew_basic_autentication):
 
 ```nginx
 server {
@@ -95,7 +95,7 @@ server {
 
 #### T2: Add Authentication for `contact.html`
 
-Modify the server block to require authentication for `contact.html`:
+Modify the server block to require authentication for `contact.html` (pew_contact_autentication):
 
 ```nginx
 server {
@@ -122,7 +122,7 @@ server {
 
 #### T3.1: Restrict Access by IP
 
-Configure Nginx to deny access from the host machine's IP to the website's root:
+Configure Nginx to deny access from the host machine's IP to the website's root (pew_host_denied_access):
 
 ```nginx
 server {
@@ -139,11 +139,7 @@ server {
         auth_basic_user_file /etc/nginx/.htpasswd;
         try_files $uri $uri/ =404;
 
-        location = /contact.html {
-            auth_basic "Restricted Area";
-            auth_basic_user_file /etc/nginx/.htpasswd;
-        }
-    }
+      }
 }
 ```
 
@@ -153,7 +149,7 @@ server {
 
 #### T3.2: Combine IP and User Authentication
 
-Configure Nginx to require both a valid IP and user credentials:
+Configure Nginx to require both a valid IP and user credentials (pew_both_credential_valid):
 
 ```nginx
 server {
