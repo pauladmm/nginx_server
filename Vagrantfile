@@ -20,6 +20,7 @@ Vagrant.configure("2") do |config|
     apt install vsftpd -y
     apt install apache2-utils
   apt-get install -y bind9
+  apt install ufw
   
 
   # Configure website directory for my_site(from repo) & new_site(personal web) & perfect_education_website(auth)
@@ -101,6 +102,11 @@ Vagrant.configure("2") do |config|
     sh -c "openssl passwd -apr1 'delMoralpsswd'>> /etc/nginx/.htpasswd"
 
     systemctl restart nginx
+
+  # Firewall enabled
+   ufw allow ssh ①
+   ufw allow 'Nginx Full'
+   ufw delete allow 'Nginx HTTP' 
 
 SHELL
 end
