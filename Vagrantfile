@@ -49,7 +49,7 @@ Vagrant.configure("2") do |config|
     cp -v /vagrant/my_site/my_site /etc/nginx/sites-available/my_site
     cp -v /vagrant/new_site/new_site /etc/nginx/sites-available/
   # This last version allow host to access with credentials and ip
-    cp -v /vagrant/perfect_education_website /etc/nginx/sites-available/perfect_education_website
+    cp -v /vagrant/pew_files/perfect_education_website /etc/nginx/sites-available/perfect_education_website
 
   # copy config files from DNS server perfect-education.com
   cp /vagrant/pew_files/db.perfect-education.com /etc/bind/db.perfect-education.com
